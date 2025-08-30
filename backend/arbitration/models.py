@@ -1,0 +1,95 @@
+from django.db import models
+
+class TicketArbitrationData(models.Model):
+    ticket_id = models.ForeignKey("arbitration.Ticket", related_name="ticket_arbitrations", null=True, blank=True, on_delete=models.SET_NULL)
+    seller_agreed = models.IntegerField(blank=True, null=True)
+    agreement_terms = models.TextField(db_collation='utf8mb4_unicode_ci', blank=True, null=True)
+    buyer_agreed = models.IntegerField(blank=True, null=True)
+    settlement_title = models.CharField(max_length=255, db_collation='utf8mb4_unicode_ci', blank=True, null=True)
+    settlement_amount = models.FloatField(blank=True, null=True)
+    stripe_link = models.TextField(db_collation='utf8mb4_unicode_ci', blank=True, null=True)
+    stripe_payment_data = models.TextField(db_collation='utf8mb4_bin', blank=True, null=True)
+    seller_paid = models.IntegerField(blank=True, null=True)
+    stripe_transfer_to_buyer_data = models.TextField(db_collation='utf8mb4_bin', blank=True, null=True)
+    stripe_seller_paid_data = models.TextField(db_collation='utf8mb4_bin', blank=True, null=True)
+    transfer_to_buyer = models.IntegerField(blank=True, null=True)
+    created_by = models.ForeignKey("users.User", related_name="created_ticket_arbitration_data", null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey("users.User", related_name="updated_ticket_arbitration_data", null=True, blank=True, on_delete=models.SET_NULL)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)
+
+
+class Ticket(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    email = models.CharField(max_length=255, blank=True, null=True)
+    category_id = models.ForeignKey("arbitration.TicketTypes", related_name="tickets", null=True, blank=True, on_delete=models.SET_NULL)
+    auction_id = models.CharField(max_length=255, blank=True, null=True)
+    dealer_id = models.CharField(max_length=255, blank=True, null=True)
+    location_id = models.CharField(max_length=255, blank=True, null=True)
+    buyer_id = models.ForeignKey("users.Dealership", related_name="buyer_tickets", null=True, blank=True, on_delete=models.SET_NULL)
+    seller_id = models.ForeignKey("users.Dealership", related_name="seller_tickets", null=True, blank=True, on_delete=models.SET_NULL)
+    priority = models.CharField(max_length=255, db_comment='0=low,1=medium,2=high')
+    subject = models.TextField()
+    message = models.TextField()
+    status = models.ForeignKey("arbitration.TicketStatus", related_name="tickets", on_delete=models.SET_NULL, null=True, blank=True)
+    openedby = models.CharField(max_length=255, blank=True, null=True)
+    closedby = models.CharField(max_length=255, blank=True, null=True)
+    ip = models.CharField(max_length=255, blank=True, null=True)
+    assigned_to = models.CharField(max_length=255, blank=True, null=True)
+    assigned_by = models.CharField(max_length=255, blank=True, null=True)
+    created_by = models.ForeignKey("users.User", related_name='created_tickets', null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey("users.User", related_name='updated_tickets', null=True, blank=True, on_delete=models.SET_NULL)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class TicketAttachment(models.Model):
+    ticket_id = models.ForeignKey("arbitration.Ticket", related_name='attachments', null=True, blank=True, on_delete=models.SET_NULL)
+    file_from_type = models.CharField(max_length=255, blank=True, null=True, db_comment='0=from buyer, 1=from admin, 2=from seller, 3= other')
+    storage = models.CharField(max_length=255, blank=True, null=True, db_comment='0=local , 1=cloudinary')
+    file_url = models.CharField(max_length=255, blank=True, null=True)
+    comment_id = models.ForeignKey("arbitration.TicketComment", related_name='attachments', null=True, blank=True, on_delete=models.SET_NULL)
+    arbitration_id = models.ForeignKey('arbitration.TicketArbitrationData', related_name='attachments', null=True, blank=True, on_delete=models.SET_NULL)
+    created_by = models.ForeignKey("users.User", related_name='created_ticket_attachments', null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey("users.User", related_name='updated_ticket_attachments', null=True, blank=True, on_delete=models.SET_NULL)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class TicketComment(models.Model):
+    ticket_id = models.ForeignKey("arbitration.Ticket", related_name='comments', null=True, blank=True, on_delete=models.SET_NULL)
+    type = models.CharField(max_length=255, blank=True, null=True)
+    comment = models.TextField(blank=True, null=True)
+    created_by = models.ForeignKey("users.User", related_name='created_ticket_comments', null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey("users.User", related_name='updated_ticket_comments', null=True, blank=True, on_delete=models.SET_NULL)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class TicketTypes(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    is_default = models.CharField(max_length=255, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    created_by = models.ForeignKey("users.User", related_name='created_ticket_types', null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey("users.User", related_name='updated_ticket_types', null=True, blank=True, on_delete=models.SET_NULL)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+
+class TicketStatus(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    color = models.CharField(max_length=255, blank=True, null=True)
+    is_default = models.CharField(max_length=255, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    ticket_type = models.ForeignKey("arbitration.TicketTypes", related_name="ticket_statuses", on_delete=models.SET_NULL, null=True, blank=True)
+    type_can_be_change = models.CharField(max_length=255, blank=True, null=True)
+    created_by = models.ForeignKey("users.User", related_name='created_ticket_statuses', null=True, blank=True, on_delete=models.SET_NULL)
+    updated_by = models.ForeignKey("users.User", related_name='updated_ticket_statuses', null=True, blank=True, on_delete=models.SET_NULL)
+    deleted_at = models.DateTimeField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)

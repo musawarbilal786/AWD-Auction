@@ -1,0 +1,16 @@
+requests==2.32.*
+djangorestframework==3.16.0
+djangorestframework_simplejwt==5.5.0
+dj-rest-auth==7.0.*
+python-decouple==3.8
+django-cors-headers
+django-constance
+django-extensions
+django-filter
+mysqlclient
+django-redis==5.4.*
+django-constance[redis]==4.3.*
+cloudinary==1.44.1
+python-dotenv==1.1.1
+Django
+dj-stripe>=2.8.0
